@@ -479,29 +479,6 @@ plot.bernard <- function(bernard.collapsed.data, blueprint.mature.cols, gene, re
 }
 
 
-translate_name_to_net <- function(name, region.names){
-  tmp.reg.names     <- c(region.names, 'TempPar')
-  string.match.idxs <- unlist(lapply(lapply(tmp.reg.names, grep, x=name), length))
-  name.for.this.reg <- tmp.reg.names[which(string.match.idxs == 1)]
-  if ( name.for.this.reg == 'TempPar' ) {
-    name.for.this.reg = 'Default'
-  }
-  return(name.for.this.reg)
-}
-
-
-assign_color_to_corr <- function(net.1, net.2){
-  
-  if (net.1 == net.2){
-    color.out <- 'cornflowerblue'
-
-    # unclassified
-  } else {
-    color.out <- 'darkgray'
-  }
-  return(color.out)
-}
-
 
 # Function to set the number of ticks on a ggplot graph
 # --------------
@@ -614,41 +591,6 @@ networkAvgIndividual <- function(regions.in, don.in, dat.type, reg2yeo, network.
     dat.out[[donor]] <- avg.expr
   }
   
-  return(dat.out)
-}
-
-
-
-networkAvgIndividual.perm <- function(regions.in, don.in, dat.type, reg2yeo, network.names, gene.arr, use.regions ){
-  # Args:
-  #   regions.in    = array containg indices mapping onto spatially contiguous yeo cortical parcels that will be examined
-  #   don.in        = donor numbers to be examined
-  #   dat.type      = field name of the data to be collapsed
-  #   reg2yeo       = maps spatial indices to Yeo cortical networks
-  #   network.names = the names of each Yeo cortical network  
-  #   gene.arr      = list of gene names corresponding to rows in the processed expression matrix. 
-  
-  dat.out   <- NULL
-  n.genes   <- length(gene.arr)
-  idxs      <- 1:length(regions.in)
-  rand.idxs <- sample(idxs) # randomize the indices
-  
-  for (donor in don.in){
-    
-    avg.expr <- matrix(NA, n.genes, 7) # Output structure
-    cur.data <- all_data[[donor]][[dat.type]][, regions.in]
-    tmp.cur.regs <- reg2yeo[regions.in]
-    cur.regs <- tmp.cur.regs[rand.idxs]
-    ct <- 1
-    for (reg in region.names ){
-      use.mean  <- rowMeans(cur.data[,which(cur.regs == reg)], na.rm = TRUE)
-      avg.expr[,ct] <- use.mean 
-      ct <- ct + 1
-    }
-    colnames(avg.expr) <- region.names
-    rownames(avg.expr) <- names(use.mean)
-    dat.out[[donor]] <- avg.expr
-  }
   return(dat.out)
 }
 
@@ -1018,65 +960,6 @@ averageStriatExpr <- function(striat.regions, data.struct, choi.names, samp.labe
   colnames(all.expr) <- cols.out
   striat_expr        <- as.data.frame(all.expr)
   return(striat_expr)
-}
-
-
-
-# striat_query <- function(data_struct, atlas, atlas_conf, MNI_coords) {
-#   net_arr      <- NULL
-#   net_arr_conf <- NULL
-#   in_network   <- NULL
-#   conf_network <- NULL
-#   out_network  <- NULL
-#   
-#   for ( iter in 1:dim(data_struct$striat_samples)[1] ){
-#     print(iter)
-#     #coords       <- c(data_struct$striat_samples[iter,]$mni_x, data_struct$striat_samples[iter,]$mni_y, data_struct$striat_samples[iter,]$mni_z)
-#     use_coords <- MNI_coords[MNI_coords$well_id %in% data_struct$striat_samples$well_id[iter],]
-#     coords     <- c(use_coords$mni_x, use_coords$mni_y, use_coords$mni_z)
-#     
-#     network      <- query_atlas(atlas, coords, 0, afni.dir)
-#     network_conf <- query_atlas(atlas_conf, coords, 0, afni.dir)
-# 
-#     # Check neighboring voxels
-#     if ( network == 0 ){
-#       neigh_arr <- query_atlas(atlas, coords, 1, afni.dir)
-#       num_zeros <- length(neigh_arr[neigh_arr %in% 0])
-#       if ( num_zeros == 27 ){
-#         neigh_arr <- query_atlas(atlas, coords, 2, afni.dir)
-#         num_zeros <- length(neigh_arr[neigh_arr %in% 0])
-#         if ( num_zeros == 125 ){
-#          network <- 0 
-#         } else {
-#           use       <- neigh_arr[neigh_arr>0]
-#           use_table <- summary(as.factor(use))
-#           network   <- as.integer(names(sort(use_table)))
-#           network_conf <- 0
-#         }
-#       } else {
-#         use       <- neigh_arr[neigh_arr>0]
-#         use_table <- summary(as.factor(use))
-#         network   <- as.integer(names(sort(use_table)))
-#         network_conf <- 0
-#       }
-#     }
-#     print(paste(iter,':', network))
-#     net_arr      <- c(net_arr, network[1])
-#     net_arr_conf <- c(net_arr_conf, network_conf)
-#     
-#   }
-#   return(list(net_arr, net_arr_conf))
-# }
-
-
-
-
-dist_formula <- function(p1_coords, p2_coords){
-  x_val <- (p1_coords[1] - p2_coords[1])^2
-  y_val <- (p1_coords[2] - p2_coords[2])^2
-  z_val <- (p1_coords[3] - p2_coords[3])^2
-  dist_val <- sqrt(x_val + y_val + z_val)
-  return(dist_val)
 }
 
 
