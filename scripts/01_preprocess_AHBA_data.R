@@ -1,6 +1,5 @@
 # -------------------------------
 # -------------------------------
-# -------------------------------
 # Code to pre-process AHBA data used in:
 # 
 # Gene expression links functionally coupled aspects of cortex and striatum
@@ -11,28 +10,12 @@
 # Contact:    kevin.anderson@yale.edu 
 # -------------------------------
 # -------------------------------
-# -------------------------------
 
 # use the install.packages() command if they haven't been installed
 # some packages require the biocLite() command from bioconductor 
 library(data.table) #
 library(WGCNA) #
 library(limma) #
-
-library(utils)
-library(curl)
-library(GSA)
-library(ggplot2)
-library(limma)
-library(CePa)
-library(parallel)
-library(readxl)
-library(plyr)
-library(scales)
-library(gplots)
-library(biomaRt)
-library(biomartr)
-library(GEOquery)
 
 # Modify these filepaths for your local directory structure
 # ----------------
