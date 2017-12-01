@@ -3,7 +3,7 @@ Yeo BT, Krienen FM, Sepulcre J, Sabuncu MR, Lashkari D, Hollinshead M, Roffman J
 
 The Yeo split label cortical atlas in MNI152 space can be downloaded at the following link:
 
-https://dl.dropboxusercontent.com/u/5734119/Outgoing/Yeo_JNeurophysiol11_SplitLabels.zip
+https://github.com/ThomasYeoLab/CBIG/tree/master/stable_projects/brain_parcellation/Yeo2011_fcMRI_clustering/1000subjects_reference/Yeo_JNeurophysiol11_SplitLabels
 
 Directory structure should correspond to the following:
 
