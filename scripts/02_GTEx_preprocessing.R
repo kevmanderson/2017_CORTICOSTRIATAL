@@ -93,10 +93,7 @@ for (reg.idx in 1:3){
   
   # append the samples as columns in the data frame
   count.df <- cbind(count.df, as.data.frame(USE.reg.counts))
-  
-  #dge.counts <- DGEList(USE.reg.counts)
-  #calcNormFactors(dge.counts, method='TMM', lib.size=colSums(USE.reg.counts))
-  
+
   # Get region-wise covariates
   # --------------------------
   covar.file        <- paste0(base.dir, 'data/GTEx/GTEx_Analysis_v7_eQTL_covariates/Brain_', reg,'_basal_ganglia.v7.covariates.txt')
@@ -104,7 +101,6 @@ for (reg.idx in 1:3){
   tissue.covar      <- tissue.covars.tmp[,grep('GTEX', colnames(tissue.covars.tmp))]
   rownames(tissue.covar) <- tissue.covars.tmp$ID
   region <- rep(reg, dim(tissue.covar)[2])
-  #age    <- rep(reg, dim(tissue.covar)[2])
   
   # phenotype information for the current tissue
   # --------------------------
@@ -233,11 +229,8 @@ dge.counts$samples$Age_ordinal <- as.numeric(age.ordinal)
 # normalisation using trimmed mean of M-values (TMM)
 dge.counts <- calcNormFactors(dge.counts, method="TMM")
 
-# design  <- model.matrix(~0+region + sex + platform, data=dge.counts$samples)
 formula <- formula(paste0('~0+region + sex + platform + Age_ordinal + ', paste(paste0('InferredCov', 1:15), collapse=' + ')))
 design  <- model.matrix(formula, data=dge.counts$samples)
-
-#design <- model.matrix(~0 + region, data=dge.counts$samples)
 colnames(design) <- gsub('region|sub_num','',colnames(design))
 
 contr.matrix <- makeContrasts(
@@ -267,7 +260,7 @@ cfit.2 <- eBayes(cfit.2)
 
 nacc.contrast <- topTable(cfit.2, number=Inf, sort.by="none")
 
-
+# save output for later reading
 save(file=paste(base.dir, 'data/GTEx/nacc.contrast.Rdata', sep = ''), x=nacc.contrast)
 save(file=paste(base.dir, 'data/GTEx/dge.counts.Rdata', sep = ''), x=dge.counts)
 
