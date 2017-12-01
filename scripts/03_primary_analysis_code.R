@@ -1,6 +1,5 @@
 # -------------------------------
 # -------------------------------
-# -------------------------------
 # Code to run analyses in the corticostriatal paper
 # 
 # Gene expression links functionally coupled aspects of cortex and striatum
@@ -11,36 +10,33 @@
 # Contact:    kevin.anderson@yale.edu 
 # -------------------------------
 # -------------------------------
-# -------------------------------
 
-library(data.table) #
-library(WGCNA) #
-library(psych) #
-library(doBy) #
-library(limma) #
-library(plyr) #
-library(gplots) #
-library(ggplot2) #
-library(biomartr) #
-library(pbapply) #
-library(biomaRt) #
-library(edgeR) #
-library(readxl) #
-library(GEOquery) #
+library(data.table) 
+library(WGCNA) 
+library(psych) 
+library(doBy) 
+library(limma) 
+library(plyr) 
+library(gplots) 
+library(ggplot2) 
+library(biomartr) 
+library(pbapply) 
+library(biomaRt) 
+library(edgeR) 
+library(readxl) 
+library(GEOquery) 
 
 
 # Modify these filepaths for your local directory structure
 # ----------------
 afni.dir <- '/Users/kevinanderson/abin/'  # enter the abin directory for local install of AFNI
 base.dir <- '/Users/kevinanderson/PHD/PROJECTS/2017_CORTICOSTRIATAL_NATCOMM/'  # enter the directory containing the script repository
-  
 
 # SET BASE DIRECTORY; source function library
 # ----------------
 function.lib <- paste(base.dir, 'scripts/function_library.R', sep = '')
 source(function.lib)
 # ----------------
-
 
 # READ AHBA DATA
 # ----------------
@@ -69,7 +65,6 @@ striatum    <- as.numeric(striat_in$V1)
 all_data    <- get_region_info(all_data=all_data, filenames=donor.nums, reg_IDs=striatum, name='striat')
 # ----------------
 
-
 # pearson correlations between each 7-network striatal data to each 17-network cortical parcel
 # ----------------
 striat2cort.fcmri <- read.csv(paste0(base.dir, 'reference_files/choi7_yeo17_func.csv'), header=T)
@@ -80,12 +75,10 @@ cort2cort.fcmri <- read.csv(paste0(base.dir, 'reference_files/func_cor_mat.csv')
 colnames(cort2cort.fcmri) <- rownames(cort2cort.fcmri)
 # ----------------
 
-
 # Read previously defined info about the overlap of each sample to the cortical/striatal atlases
 # ----------------
 all_data <- readAtlasOverlap(all_data, filenames=donor.nums, atlas.dir=paste0(base.dir, 'atlas_overlap'))
 # ----------------
-
 
 # ----------------
 # Read info about split label names for cortex, IDs, and color labels
@@ -95,7 +88,6 @@ atlas.key.17 <- read.table(paste0(base.dir, 'data/Yeo_JNeurophysiol11_SplitLabel
 atlas.key.7  <- read.table(paste0(base.dir, 'data/Yeo_JNeurophysiol11_SplitLabels/MNI152/7Networks_ColorLUT_freeview.txt'), col.names=c('ID','Name','R','G','B','A'))
 # ----------------
 
-
 # ----------------
 # Naming information about the Choi striatal regions (e.g. Default Mode=7)
 # ----------------
@@ -104,13 +96,11 @@ choi.names[['sev']]     <- as.character(read.csv(paste0(base.dir, 'reference_fil
 choi.names[['sevteen']] <- as.character(read.csv(paste0(base.dir, 'reference_files/choi17_names.csv'), header=F)$V1)
 # ----------------
 
-
 # Find cortical parcels that contain a sample in the at least 2 of 6 subjects
 # ----------------
 # Across both hemispheres, all subjects, 7 networks.
 use.regions.7 <- getCortRegions(all_data, donor.nums, atlas.num='7', thresh=2)
 # ----------------
-
 
 # Seperately for each donor, average expression of samples in the same cortical/striatal functional parcel
 # ----------------
@@ -179,28 +169,6 @@ for ( reg in region.names ) {
 colnames(out.matrix) <- col.headers
 rownames(out.matrix) <- rownames(cort.foldchange.n4$stats[[reg]])
 write.csv(x=out.matrix, file=paste0(base.dir, 'output_files/SUPPDATA_sheet1_n4_ahba_net7_cortical_fold_changes.csv'))
-# --------------------------
-# SUPPLEMENTAL DATA TABLE 
-# Write the genes that are significantly differentially expressed in any network at fdr 0.01
-# ------------------------
-#write.me     <- c('Network','n_genes','FDR_genes')
-#write.genes  <- vector()
-#write.nums   <- NULL
-#for ( choi in region.names ) {
-#  print(choi)
-#  # Genes that are positive and less than q=0.01
-#  # --------------
-#  genes.tmp   <- cort.foldchange.n4[['q01_genes']][[choi]]
-#  genes.in    <- paste(genes.tmp, collapse = ',')
-#  write.genes <- rbind.fill.matrix(write.genes, t(genes.tmp))
-#  write.nums  <- c(write.nums, length(genes.tmp))
-#}
-#write.genes[is.na(write.genes)] <- ''
-#t.write.genes <- t(write.genes)
-#write.me      <- rbind(region.names, rbind(write.nums, t.write.genes))
-#write.csv(x = write.me, file=paste0(base.dir, 'output_files/n4_cortical_net7_fdr_sig_genes.csv'), row.names=FALSE)
-# ------------------------
-
 
 # Figure 2C
 # Order of cortical parcels for plotting in a correlation grid. 
@@ -272,26 +240,6 @@ reg.names <- as.character(atlas.key.17$Name[2:length(atlas.key.17$Name)]) # add 
 rownames(avg.mat) <- reg.names[ordered.use.regions]
 colnames(avg.mat) <- reg.names[ordered.use.regions]
 # --------------------------
-
-
-#plot.df <- NULL
-#plot.df[['pearson']] <- pearson.avg.mat[upper.tri(pearson.avg.mat)]
-#plot.df[['spearman']] <- spearman.avg.mat[upper.tri(spearman.avg.mat)]
-#plot.df <- as.data.frame(plot.df)
-#ggplot(plot.df, aes(pearson, spearman)) + geom_point(size=3, alpha=.5, stroke=0, color='#2EA121') +
-#  ggtitle(reg) +
-#  theme(panel.grid.major = element_blank(),
-#        panel.grid.minor = element_blank(),
-#        panel.background = element_blank(),
-#        axis.line.x = element_line(size=0.5, linetype="solid", colour = "black"),
-#        axis.line.y = element_line(size=0.5, linetype="solid", colour = "black"),
-#        axis.text.x = element_text(colour="grey20",size=20),
-#        axis.text.y = element_text(colour="grey20",size=20),
-#        axis.title.x = element_text(colour="grey20",size=20),
-#        axis.title.y = element_text(colour="grey20",size=20)) +
-#  ylab("Spearman's rho") +
-#  xlab("Pearson's r") +
-#  geom_smooth(method='lm', se=FALSE)
 
 
 # Read  blue-black-red colormap
@@ -631,9 +579,6 @@ base      <- paste(base.dir, 'output_files/SUPPDATA_sheet8_sig_cortexStriat_ahba
 write.csv(x = write.me, file = base, row.names=FALSE)
 # ------------------------------------
 
-
-
-
 # SUPPLEMENTAL DATA TABLE 
 # full information on striatal fold change estimates 
 # --------------------------
@@ -968,6 +913,11 @@ for (reg in reg.names){
 # -----------------------
 
 
+
+
+
+
+
 # --------------------------------------------
 # --------------------------------------------
 # HUMAN STRIATAL REPLICATION - NIH GTEx DATA
@@ -1025,7 +975,6 @@ dge.counts.sub$genes  <- dge.counts$genes$genes[dge.counts$genes$genes %in% entr
 lcpm <- cpm(dge.counts, log=TRUE)
 lcpm.mean.norm <- t(apply(lcpm, 1, function(x) x-mean(x) ))
 
-
 ref.entrezGene.sorted[ref.entrezGene.sorted[,2] == 'PVALB']
 ref.entrezGene.sorted[ref.entrezGene.sorted[,2] == 'SSTR1']
 
@@ -1058,6 +1007,18 @@ replicationPlot(ahba.array = ahba.limbic.subset$logFC,
 
 write.csv(file=paste0(base.dir, '/output_files/GTEx_striatal_fold_change.csv'), x=gtex.nacc.foldchange.sort, quote=F)
 
+                          
+                          
+                          
+                          
+                          
+                          
+                          
+                          
+                          
+                          
+                          
+                        
 
 # ---------------------------------------
 # ---------------------------------------
@@ -1133,9 +1094,6 @@ bspan.eset <- bspan.eset[which(rowSums(bspan.eset) != 0),] # git rid of genes wi
 
 ahba.bspan.subset <- all_data[[1]]$probes_collapse[which(all_data[[1]]$probes_collapse$entrez_id %in% rownames(bspan.eset)),]
 
-
-
-bspan.ahba.sort   <- bspan.eset[order(rownames(bspan.eset)),]
 # sort ahba by entrez id 
 ahba.bspan.sort <- ahba.bspan.subset[order(as.character(ahba.bspan.subset$entrez_id)),]
 length(which(ahba.bspan.sort$entrez_id == rownames(bspan.eset)))
@@ -1156,10 +1114,6 @@ cort.regions2plot <- c('OFC','MFC','ITC','VFC','DFC','IPC','STC','M1C','A1C','S1
 plot.brainspan(bspan.eset, use_cols, 'PVALB', cort.regions2plot, ylimit=2.2)
 plot.brainspan(bspan.eset, use_cols, 'SSTR1', cort.regions2plot, ylimit=1.5)
 # -------------------
-
-# Get rid of genes with zero expression level
-# -------------------
-# use.eset <- bspan.eset[which(rowSums(bspan.eset) != 0),]
 
 # Create the design/contrast matrix
 # -------------------
@@ -1307,6 +1261,8 @@ phyper(num.overlap-1, white.genes, black.genes, genes.drawn, lower.tail = F)
 
 
 
+                          
+                          
 # -----------------------------
 # -----------------------------
 # Compare limbic cortico-striatal genes to with previously identified gene sets (e.g. Richiardi 2015; Wang 2015)
@@ -1337,6 +1293,8 @@ phyper(num.overlap-1, white.genes, black.genes, genes.drawn, lower.tail = F)
 # -------------
 
 
+                          
+                          
 
 # -----------------------------
 # -----------------------------
@@ -1464,6 +1422,11 @@ write.csv(file = paste(base.dir, 'output_files/barres_cell_enrichment_counts.csv
 
 
 
+                          
+                          
+                          
+                          
+                          
 # -------------------------------------------
 # -------------------------------------------
 # Striatal NIH Blueprint Non-human primate data 
@@ -1554,12 +1517,6 @@ regions       <- c('NAC','Ca','Pu')
 blueprint.mature.cols$age_num <- as.numeric(as.character(gsub(' mo', '', blueprint.mature.cols$age)))
 # ------------------------
 
-#age.arr <- NULL
-#for (donor in unique(blueprint.mature.cols$donor_id)){
-#  age <- as.character(blueprint.mature.cols[blueprint.mature.cols$donor_id == donor,]$age)
-#  age.arr <- c(age.arr, age[1])
-#}
-
 rownames(blueprint.mature.expr) <- blueprint.rows.use$humanGene
 
 blueprint.mature.cols <- droplevels(blueprint.mature.cols)
@@ -1575,7 +1532,6 @@ blueprint.nacc.table.sort <- blueprint.nacc.table[order(rownames(blueprint.nacc.
   
 regions2plot <- c('NAC', 'Ca', 'Pu')
 plot.blueprint(blueprint.mature.expr, colnames(blueprint.mature.expr), 'SSTR1', regions2plot, ylimit=2)
-
 
 
 # Cross-reference to the human gtex and ahba striatal data
@@ -1596,7 +1552,6 @@ limbic.sortByEntrez <- striat.foldchanges.n6$stats$Limbic[order(as.character(ahb
 rownames(limbic.sortByEntrez) <- sort(as.character(ahba.probe.info.sort$entrez_id))
 ahba.limbic.subsetByBlueprint <- limbic.sortByEntrez[rownames(limbic.sortByEntrez) %in% rownames(blueprint.nacc.ahba.subset),]
 
-
 # BLUEPRINT - AHBA limbic striatum fold change correlation 
 # ---------------
 cor.test(ahba.limbic.subsetByBlueprint$logFC, blueprint.nacc.ahba.subset$logFC)
@@ -1607,8 +1562,6 @@ gtex.nacc.subsetByBlueprint <- gtex.nacc.foldchange[gtex.nacc.foldchange$genes %
 blueprint.nacc.subsetByGTEx <- blueprint.nacc.table.sort[rownames(blueprint.nacc.table.sort) %in% gtex.nacc.foldchange$genes,]
 blueprint.nacc.subsetByGTEx <- blueprint.nacc.subsetByGTEx[order(rownames(blueprint.nacc.subsetByGTEx)),]
 cor.test(gtex.nacc.subsetByBlueprint$logFC, blueprint.nacc.subsetByGTEx$logFC)
-
-
 
 # ------------------------
 # Plot 
@@ -1624,7 +1577,11 @@ monk.replicationPlot(ahba.dat = ahba.limbic.subsetByBlueprint,
                      ylimit = 5)
 
 
-
+                          
+                          
+                          
+                          
+                          
 
 # --------------------------------------------------
 # --------------------------------------------------
@@ -1779,10 +1736,6 @@ cor.test(bernard.limbic.subsetByAHBA$logFC, cort.ahba.limbic.subsetByBernard$log
 
 # Plot 
 # ------------------------
-#bernard.limbic.table.subset           <- bernard.limbic.table[which(rownames(bernard.limbic.table) %in% name_arr),]
-#rownames(bernard.limbic.table.subset) <- gene.arr
-#write.csv(x=bernard.limbic.table.subset[order(rownames(bernard.limbic.table.subset)),], file=paste(base.dir, '/output_files/Bernard_limbicCort_DEX.csv', sep=''))
-# -----------------------
 ahba.limbic.cort.entrez <- rownames(cort.ahba.limbic)[intersect(which(cort.ahba.limbic$logFC > 0), which(cort.ahba.limbic$adj.P.Val <=.01))]
 monk.replicationPlot(ahba.dat = cort.ahba.limbic.subsetByBernard, 
                      ahba.sig.genes = as.character(ahba.limbic.cort.entrez),
@@ -1809,10 +1762,6 @@ cor.test(bernard.limbic.subsetByBSPAN$logFC, bspan.limbic.subsetByBernard$logFC)
 
 bspan.limbic.cort.entrez <- rownames(bspan.limbic.sort)[intersect(which(bspan.limbic.sort$logFC > 0), which(bspan.limbic.sort$adj.P.Val <=.01))]
 # Plot 
-# ------------------------
-#bernard.limbic.table.subset           <- bernard.limbic.table[which(rownames(bernard.limbic.table) %in% name_arr),]
-#rownames(bernard.limbic.table.subset) <- gene.arr
-#write.csv(x=bernard.limbic.table.subset[order(rownames(bernard.limbic.table.subset)),], file=paste(base.dir, '/output_files/Bernard_limbicCort_DEX.csv', sep=''))
 # ----------------------
 monk.replicationPlot(ahba.dat = bspan.limbic.subsetByBernard, 
                      ahba.sig.genes = as.character(bspan.limbic.cort.entrez),
@@ -1823,23 +1772,9 @@ monk.replicationPlot(ahba.dat = bspan.limbic.subsetByBernard,
                      ylimit = 2.5)
 
 
-
 # Convert the primate probe names to AHBA gene names
 # -------------------------
 avg.bernard.expr.plot <- averaged.data.unique #[which(rownames(averaged.data.unique) %in% name_arr),]
-#ct <- 1
-#bernard.genes <- NULL
-#head(averaged.data.unique)
-#for (probe in rownames(avg.bernard.expr.plot)){
-#  print(ct)
-#  ct <- ct + 1
-#  tmp.entrez      <- as.character(bernard.wHomologs.unique$humanEntrez[which(bernard.wHomologs.unique$probe == probe)])
-#  idx             <- which(all_data[[1]]$probes_collapse$entrez_id == tmp.entrez)
-#  ahba.gene.name  <- as.character(all_data[[1]]$probes_collapse[idx,]$gene_symbol) 
-#  bernard.genes   <- c(bernard.genes, ahba.gene.name)
-#}
-# ----------------------
-
 
 # Plot gene expression 
 # -------------------------
@@ -1893,11 +1828,6 @@ black.genes        <- num.genes-length(monkey.sig.limbic.genes)
 genes.drawn        <- length(replication.limbic.genes)
 phyper(num.overlap-1, white.genes, black.genes, genes.drawn, lower.tail = F)
 
-
-
-
-
-
 # Somatomotor Differential expression in macaque cortex
 # ------------------------------
 cur_contrast <- paste('-0.1428571*Orbitofrontal_cortex-0.1428571*Anterior_cingulate_gyrus-0.1428571*Middle_temporal_area-',
@@ -1917,7 +1847,7 @@ bernard.sommot.stats[rownames(bernard.sommot.stats) =='5816',] # pvalb
 bernard.limbic.table[rownames(bernard.limbic.table) =='6750',] # sst
 bernard.limbic.table[rownames(bernard.limbic.table) =='6751',] # sstr1
 
-
+                          
 # compare blueprint to AHBA
 rownames(bernard.sommot.stats) <- as.character(rownames(bernard.sommot.stats))
 bernard.sommot.sort  <- bernard.sommot.stats[order(rownames(bernard.sommot.stats)),]
